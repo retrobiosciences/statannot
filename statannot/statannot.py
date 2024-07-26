@@ -8,33 +8,20 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from seaborn.utils import remove_na
+from scipy import stats
 
 from .utils import raise_expected_got, assert_is_in
 from .StatResult import StatResult
 
 import matplotlib.ticker as mticker
-# from matplotlib.ticker import ScalarFormatter
 scalar_formatter = mticker.ScalarFormatter(useMathText=True)
 scalar_formatter.set_powerlimits((-3, 3))
 
-from scipy import stats
-
 DEFAULT = object()
 
-def custom_scientific_format(value):
-    # Format the number in scientific notation with one digit after the decimal point
-    base, exponent = f"{value:.1e}".split('e')
+def custom_scientific_format(value, decimal=1):
+    base, exponent = f"{value:.{decimal}e}".split('e')
     return f"{base} \\times 10^{{{int(exponent)}}}"
-
-# class CustomScalarFormatter(ScalarFormatter):
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.format = '%1.1e'
-
-#     def _set_format(self, vmin=None, vmax=None):
-#         self.format = '%1.1e'
-
-# scalar_formatter = CustomScalarFormatter()
 
 def stat_test(
     box_data1,
@@ -455,26 +442,24 @@ def add_stat_annotation(ax, plot='boxplot',
             text = text_annot_custom[i_box_pair]
         else:
             if text_format == 'full':
+                pval = result.pval
                 if pvalue_format_string != None:
-                    text = "{}".format(pvalue_format_string).format(result.pval) 
-                    print(pvalue_format_string)
-                    print(text)
+                    if "e" in pvalue_format_string:
+                        n_decimals = int(pvalue_format_string.split(".")[1].split("e")[0])
+                        formatted_pval = custom_scientific_format(pval, decimal=n_decimals)
+                        text = f"${formatted_pval}$"
+                    else:
+                        text = "{}".format(pvalue_format_string).format(result.pval) 
                 else:
-                    pval = result.pval
-                    print(pval)
                     if pval < 1e-3:
                         formatted_pval = custom_scientific_format(pval)
                         text = f"${formatted_pval}$"
-                        # wonder if there is a way to harmonize text font?
                     if pval > 1e-1:
                         text = f"{pval:.2f}"
                     if pval > 1e-2:
                         text = f"{pval:.3f}"
                     if pval > 1e-3:
                         text = f"{pval:.4f}"
-                    print(text)
-                # else:
-                #     text = pvalue_format_string.format(result.pval)
             elif text_format is None:
                 text = None
             elif text_format == 'star':
