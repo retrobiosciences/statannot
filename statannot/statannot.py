@@ -12,10 +12,14 @@ from scipy import stats
 
 from .utils import raise_expected_got, assert_is_in
 from .StatResult import StatResult
+from packaging import version
 
 import matplotlib.ticker as mticker
 scalar_formatter = mticker.ScalarFormatter(useMathText=True)
 scalar_formatter.set_powerlimits((-3, 3))
+
+def check_version(package_version, required_version):
+    return version.parse(package_version) >= version.parse(required_version)
 
 DEFAULT = object()
 
@@ -223,6 +227,9 @@ def add_stat_annotation(ax, plot='boxplot',
     Optionally computes statistical test between pairs of data series, and add statistical annotation on top
     of the boxes/bars.
     """
+
+    if not check_version(sns.__version__, "0.13.2"):
+        raise ValueError("Seaborn version 0.13.2 or above is required for this feature.")
 
     def find_x_position_box(box_names, boxName):
         """
