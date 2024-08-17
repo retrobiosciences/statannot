@@ -461,12 +461,14 @@ def add_stat_annotation(ax, plot='boxplot',
                     if pval < 1e-3:
                         formatted_pval = custom_scientific_format(pval)
                         text = f"${formatted_pval}$"
-                    if pval > 1e-1:
+                    elif pval > 1e-1:
                         text = f"{pval:.2f}"
-                    if pval > 1e-2:
+                    elif pval > 1e-2:
                         text = f"{pval:.3f}"
-                    if pval > 1e-3:
+                    elif pval > 1e-3:
                         text = f"{pval:.4f}"
+                    else:
+                        text = f"{pval}"
             elif text_format is None:
                 text = None
             elif text_format == 'star':
